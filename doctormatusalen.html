@@ -10,7 +10,7 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <span class="nav-logo">Salud<span style="font-weight: 300;">Parkinson</span></span>
+            <span class="nav-logo">Salud<span style="font-weight: 300;">Parkinson</span> <span style="font-weight:500;color:#2a7">Doctor Matusalén</span></span>
             <div class="nav-links">
                 <a href="#" class="nav-item active" onclick="switchSection('inicio', this)">Inicio</a>
                 <a href="#" class="nav-item" onclick="switchSection('nosotros', this)">Nosotros</a>
@@ -25,9 +25,7 @@
             <button class="close-sidebar" id="closeSidebar">&times;</button>
         </div>
         <ul class="channel-list">
-            <li><a href="#" class="channel-link active" onclick="selectChannel('Doctor Matusalén')">Doctor Matusalén</a></li>
-            <li><a href="#" class="channel-link" onclick="selectChannel('Neurología TV')">Neurología TV</a></li>
-            <li><a href="#" class="channel-link" onclick="selectChannel('Fisioterapia Activa')">Fisioterapia Activa</a></li>
+            <li><a href="https://www.youtube.com/@doctormatusalen" class="channel-link active" target="_blank">Doctor Matusalén</a></li>
         </ul>
     </aside>
 
@@ -35,24 +33,64 @@
 
     <main class="main-content">
         <section id="section-inicio" class="content-section active">
-            <div class="section-header">
-                <h1 id="channelTitle">Doctor Matusalén</h1>
-                <p id="channelCount">Cargando videos...</p>
-            </div>
+                        <div class="section-header">
+                                <p id="channelCount">Cargando videos...</p>
+                                <p id="totalDuration" style="font-weight:bold;color:#2a7">Duración total: ...</p>
+                                <div class="channel-description" style="margin-top:10px;font-size:1.05em;color:#333">
+                                    <strong>@Doctormatusalen</strong> es un canal de Youtube donde su creador demuestra que no somos lo que nos pasa, sino cómo lo enfrentamos. <strong>— Jamás una víctima, siempre un luchador.</strong>
+                                </div>
+                        </div>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Buscar por título, síntoma o categoría...">
             </div>
             <div id="dashboard"></div>
         </section>
 
-        <section id="section-nosotros" class="content-section">
-            <div class="about-card">
-                <h2>Sobre este Proyecto</h2>
-                <p>Esta plataforma centraliza el conocimiento compartido por expertos en Parkinson para facilitar la búsqueda de información específica a pacientes y familiares.</p>
-                <br>
-                <p>Diseñado para una navegación rápida, sencilla y accesible desde cualquier dispositivo.</p>
-            </div>
-        </section>
+                <section id="section-nosotros" class="content-section">
+                        <div class="about-card">
+                                <h2>Sobre este Proyecto</h2>
+                                <p>🌟 <strong>Quién es Doctor Matusalén</strong><br>
+                                Es un médico de familia que dedicó 33 años a cuidar a otros, a escuchar, a acompañar, a sostener. Y cuando la vida le puso delante un desafío serio —13 años conviviendo con Parkinson— no eligió esconderse, ni rendirse, ni convertirse en un símbolo de lástima. Eligió lo contrario: seguir siendo útil, seguir aportando, seguir luchando.</p>
+
+                                <p>🔥 <strong>Su actitud</strong><br>
+                                La actitud del Doctor Matusalén se puede resumir en tres pilares:</p>
+                                
+                                    <div style="margin-bottom:1em"><strong>Dignidad combativa</strong><br>
+                                    No niega su enfermedad, pero tampoco se deja definir por ella.<br>
+                                    No se presenta como víctima, sino como alguien que sigue peleando cada día.</div>
+                                    <div style="margin-bottom:1em"><strong>Servicio incluso después del servicio</strong><br>
+                                    Aunque está jubilado, su vocación no se apagó.<br>
+                                    Su canal de YouTube es una extensión natural de su vida profesional:<br>
+                                    seguir ayudando, seguir enseñando, seguir acompañando.</div>
+                                    <div style="margin-bottom:1em"><strong>Resiliencia con propósito</strong><br>
+                                    No lucha por orgullo ni por apariencia.<br>
+                                    Lucha porque sabe que su ejemplo puede inspirar a otros que atraviesan dificultades.<br>
+                                    Su mensaje es simple:<br>
+                                    “No puedo elegir lo que me pasa, pero sí cómo respondo.”</div>
+                                
+
+                                <p>🎥 <strong>Por qué tiene un canal de YouTube</strong><br>
+                                Su canal no es un pasatiempo. Es una misión.</p>
+                                
+                                    Compartir experiencia médica desde la cercanía de quien ha visto miles de historias reales.
+                                    Dar voz a quienes viven con enfermedades crónicas, sin dramatismo ni victimismo.
+                                    Demostrar que la jubilación no es el final, sino una nueva etapa para crear, comunicar y aportar.
+                                    Mantenerse activo, mental y emocionalmente, porque la actividad es también una forma de tratamiento.
+                                    Inspirar, sin pretenderlo, a quienes creen que ya no pueden más.
+                                
+
+                                <p>💪 <strong>Su motivo profundo</strong><br>
+                                El motor del Doctor Matusalén es este:<br>
+                                Convertir su propia vulnerabilidad en una herramienta de fortaleza para otros.<br>
+                                No busca compasión.<br>
+                                No busca aplausos.<br>
+                                Busca sentido.<br>
+                                Y lo encuentra en cada persona que aprende algo, que se siente acompañada, que descubre que no está sola.</p>
+
+                                <p style="margin-top:2em;">Esta plataforma centraliza el conocimiento compartido por expertos en Parkinson para facilitar la búsqueda de información específica a pacientes y familiares.<br><br>
+                                Diseñado para una navegación rápida, sencilla y accesible desde cualquier dispositivo.</p>
+                        </div>
+                </section>
     </main>
 
     <script>
@@ -71,9 +109,15 @@
                     categoria: extraerCategoria(v.title, v.description),
                     url: `https://www.youtube.com/watch?v=${v.id}`,
                     canal: 'Doctor Matusalén',
-                    fecha: v.publishedAt ? v.publishedAt.split('T')[0] : ''
+                    fecha: v.publishedAt ? v.publishedAt.split('T')[0] : '',
+                    duracion: v.duration || ''
                 }));
                 document.getElementById('channelCount').textContent = `${allVideos.length} videos disponibles`;
+
+                // Calcular duración total usando el JS externo
+                const totalSeconds = window.calcularTotalSegundos(allVideos);
+                const texto = window.formatoDuracion(totalSeconds);
+                document.getElementById('totalDuration').textContent = `Duración total: ${texto}`;
                 renderDashboard('');
             } catch (e) {
                 console.error("Error: Asegúrate de tener un archivo videos_matusalen.json válido.", e);
@@ -193,5 +237,6 @@
 
         loadData();
     </script>
+    <script src="calculoDuracion.js"></script>
 </body>
 </html>

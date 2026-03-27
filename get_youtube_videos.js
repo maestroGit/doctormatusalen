@@ -4,10 +4,26 @@
 const fs = require('fs');
 const { google } = require('googleapis');
 
-const apiKey = 'AIzaSyBLZeF7Qebi4dznpSJL9teeyMqARbjdwq8'; // <-- Pega tu API key aquí
+require('dotenv').config();
+const apiKey = process.env.YOUTUBE_API_KEY; // <-- Lee la clave desde .env
 const channelId = 'UCl82VvswZDxdrNfr7mh_tAg'; // Canal Doctor Matusalén (correcto)
 
 const youtube = google.youtube({ version: 'v3', auth: apiKey });
+
+// Convierte una duración ISO 8601 (PT#M#S, PT#H#M#S, etc) a segundos
+function durationToSeconds(duration) {
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || '0', 10);
+  const minutes = parseInt(match[2] || '0', 10);
+  const seconds = parseInt(match[3] || '0', 10);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+// Suma el total de segundos de todos los videos
+function calcularTotalSegundos(videos) {
+  return videos.reduce((acc, v) => acc + durationToSeconds(v.duration), 0);
+}
 
 async function getAllVideos(channelId) {
   let videos = [];
@@ -95,4 +111,8 @@ async function getAllVideos(channelId) {
   const unique = Object.values(prevVideos.reduce((acc, v) => { acc[v.id] = v; return acc; }, {}));
   fs.writeFileSync(path, JSON.stringify(unique, null, 2));
   console.log(`Guardados ${unique.length} videos en videos_matusalen.json (${nuevos} nuevos añadidos)`);
+
+  // Calcular y mostrar el total de segundos acumulados
+  const totalSegundos = calcularTotalSegundos(unique);
+  console.log(`Duración total acumulada de videos: ${totalSegundos} segundos (${(totalSegundos/60).toFixed(2)} minutos, ${(totalSegundos/3600).toFixed(2)} horas)`);
 })();
