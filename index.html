@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>IFAM Assistant v1.5 - Movilidad Macro & Micro</title>
+    <style>
+        :root { --primary: #0984e3; --dark: #2d3436; --accent: #6c5ce7; --success: #27ae60; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .app-container { width: 100%; max-width: 650px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { color: var(--dark); border-left: 5px solid var(--primary); padding-left: 15px; font-size: 1.4rem; margin-bottom: 25px; }
+        .section-title { font-size: 0.9rem; font-weight: bold; color: var(--primary); text-transform: uppercase; margin-bottom: 15px; display: block; }
+        .question-step { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .transport-box { background: #f9f9ff; padding: 20px; border-radius: 15px; border: 1px solid #e0e0ff; margin-bottom: 25px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; font-size: 0.95rem; }
+        .info-txt { font-size: 0.8rem; color: #666; margin-bottom: 10px; display: block; }
+        select, input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
+        input[type="range"] { width: 100%; accent-color: var(--primary); }
+        .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #999; margin-top: 5px; }
+        .result-card { background: var(--dark); color: white; padding: 25px; border-radius: 15px; text-align: center; margin-top: 30px; }
+        #ifam-val { font-size: 3.2rem; font-weight: bold; color: #74b9ff; display: block; }
+        .status-pill { padding: 6px 18px; border-radius: 50px; font-weight: bold; margin-top: 10px; display: inline-block; font-size: 0.9rem; }
+        .debug-info { font-size: 0.7rem; color: #aaa; margin-top: 10px; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>Calculadora IFAM v1.5</h1>
+
+    <div class="question-step">
+        <span class="section-title">1. Perfil del Paciente</span>
+        <label>Nivel de Progresión (Beta)</label>
+        <select id="q-beta" onchange="liveCalc()">
+            <option value="1.25">L1 - Inicial (Sintomatología leve)</option>
+            <option value="1.50">L2 - Moderado (Rigidez/Temblor)</option>
+            <option value="1.75">L3 - Avanzado (Fluctuaciones)</option>
+            <option value="2.50">L4 - Complejo (Dependencia alta)</option>
+        </select>
+    </div>
+
+    <div class="transport-box">
+        <span class="section-title">2. Logística de Movilidad (D_total)</span>
+        
+        <label>Distancia del Trayecto (KM ida y vuelta)</label>
+        <input type="number" id="q-km" value="10" min="0" oninput="liveCalc()">
+
+        <label>Modo de Transporte (Carga Macro)</label>
+        <select id="q-modo" onchange="liveCalc()">
+            <option value="0">Teletrabajo (Gasto 0)</option>
+            <option value="0.5">Coche propio (Carga 0.5)</option>
+            <option value="2.0">Transporte Público / Caminar (Carga 2.0)</option>
+        </select>
+
+        <label>Movilidad en el Puesto (Carga Micro): <span id="val-micro">3</span></label>
+        <input type="range" id="q-micro" min="1" max="10" value="3" oninput="liveCalc()">
+        <div class="range-labels"><span>Estático</span><span>Movilidad Constante</span></div>
+    </div>
+
+    <div class="question-step">
+        <span class="section-title">3. Esfuerzo Operativo</span>
+        <label>Tarea Principal</label>
+        <select id="q-task" onchange="liveCalc()">
+            <option value="58320">Gestión por Voz / Lectura (Bajo ID)</option>
+            <option value="141480">Oficina Estándar (Teclado/Ratón)</option>
+            <option value="212400">Operativo Manual (Corte/Montaje/Alta Precisión)</option>
+        </select>
+
+        <label style="margin-top:15px;">Interacción Social (Eta): <span id="val-eta">5</span> personas</label>
+        <input type="range" id="q-eta-social" min="0" max="40" value="5" oninput="liveCalc()">
+    </div>
+
+    <div class="result-card">
+        <h3>Índice de Fatiga Proyectado</h3>
+        <span id="ifam-val">0</span>
+        <div id="status-pill" class="status-pill">ZONA</div>
+        <p id="recommendation" style="font-size: 0.85rem; margin-top: 15px; font-style: italic;"></p>
+        <div class="debug-info" id="debug-d">D_total: 0</div>
+    </div>
+</div>
+
+<script>
+function liveCalc() {
+    // 1. Obtener valores
+    const beta = parseFloat(document.getElementById('q-beta').value);
+    const km = parseFloat(document.getElementById('q-km').value) || 0;
+    const factorModo = parseFloat(document.getElementById('q-modo').value);
+    const microMov = parseInt(document.getElementById('q-micro').value);
+    const sumTID = parseInt(document.getElementById('q-task').value);
+    const nu = parseInt(document.getElementById('q-eta-social').value);
+    
+    // Actualizar etiquetas visuales
+    document.getElementById('val-micro').innerText = microMov;
+    document.getElementById('val-eta').innerText = nu;
+
+    // 2. Cálculos Intermedios
+    const gamma = 1.2; // Martes estándar
+    const etaSocial = 1.0 + (0.05 * nu);
+
+    // CÁLCULO DE D_TOTAL (Macro + Micro)
+    // Trayecto Macro + Esfuerzo en puesto
+    const dTotal = (km * factorModo) + microMov;
+    document.getElementById('debug-d').innerText = "D_total calculado: " + dTotal.toFixed(2);
+
+    // 3. FÓRMULA MAESTRA IFAM
+    // FactorD utiliza el logaritmo de la nueva D_total
+    const factorD = Math.log2(4 * dTotal + 1);
+    const totalIFAM = Math.round(gamma * etaSocial * sumTID * beta * factorD);
+
+    // 4. Actualización de UI
+    const scoreElement = document.getElementById('ifam-val');
+    const pill = document.getElementById('status-pill');
+    const rec = document.getElementById('recommendation');
+
+    scoreElement.innerText = totalIFAM.toLocaleString();
+
+    if (totalIFAM < 1000000) {
+        pill.innerText = "VERDE: Sostenible";
+        pill.style.background = "#27ae60";
+        rec.innerText = "Condiciones óptimas. El trayecto no compromete tu jornada.";
+    } else if (totalIFAM < 3000000) {
+        pill.innerText = "AMARILLA: Vigilancia";
+        pill.style.background = "#f1c40f"; pill.style.color = "#2d3436";
+        rec.innerText = "Fatiga moderada. El desplazamiento empieza a restar reserva dopaminérgica.";
+    } else if (totalIFAM < 6000000) {
+        pill.innerText = "NARANJA: Crítica";
+        pill.style.background = "#e67e22";
+        rec.innerText = "Riesgo alto. La combinación de trayecto y tarea requiere adaptación urgente.";
+    } else {
+        pill.innerText = "ROJA: Inviable";
+        pill.style.background = "#c0392b";
+        rec.innerText = "Colapso de canal inminente. El trayecto físico macro es incompatible con el nivel Beta.";
+    }
+}
+
+// Iniciar al cargar
+window.onload = liveCalc;
+</script>
+
+</body>
+</html>
