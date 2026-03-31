@@ -48,14 +48,15 @@ app.listen(PORT, () => {
   console.log('[LOG] Servidor Express INICIADO');
 });
 
+
 process.on('SIGINT', () => {
   console.log('[LOG] Servidor Express DETENIDO por SIGINT (Ctrl+C)');
-  // No llamamos process.exit() aquí para ver si el proceso se mantiene
+  process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   console.log('[LOG] Servidor Express DETENIDO por SIGTERM');
-  // No llamamos process.exit() aquí para ver si el proceso se mantiene
+  process.exit(0);
 });
 
 console.log('[LOG] Fin del archivo server.js alcanzado');

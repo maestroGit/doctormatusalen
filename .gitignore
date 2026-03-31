@@ -3,7 +3,5 @@ node_modules/
 .env
 .DS_Store
 npm-debug.log*
-videos_matusalen.json
-videos_dashboard.json
 *.md
 IFAM-3.png
