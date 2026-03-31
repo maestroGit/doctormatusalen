@@ -1,10 +1,11 @@
 // Reemplaza 'YOUR_API_KEY' con tu clave de Google Cloud
 // Reemplaza 'CHANNEL_ID' con el ID del canal de YouTube
 
-const fs = require('fs');
-const { google } = require('googleapis');
 
-require('dotenv').config();
+import fs from 'fs';
+import { google } from 'googleapis';
+import dotenv from 'dotenv';
+dotenv.config();
 const apiKey = process.env.YOUTUBE_API_KEY; // <-- Lee la clave desde .env
 const channelId = 'UCl82VvswZDxdrNfr7mh_tAg'; // Canal Doctor Matusalén (correcto)
 
@@ -85,34 +86,37 @@ async function getAllVideos(channelId) {
   return videos;
 }
 
-(async () => {
-  let prevVideos = [];
-  let prevIds = new Set();
-  const fs = require('fs');
-  const path = 'videos_matusalen.json';
-  if (fs.existsSync(path)) {
-    try {
-      prevVideos = JSON.parse(fs.readFileSync(path, 'utf8'));
-      prevVideos.forEach(v => prevIds.add(v.id));
-      console.log(`Cargados ${prevVideos.length} videos previos.`);
-    } catch (e) {
-      console.warn('No se pudo leer videos_matusalen.json, se sobrescribirá.');
-    }
-  }
-  const videos = await getAllVideos(channelId);
-  let nuevos = 0;
-  for (const v of videos) {
-    if (!prevIds.has(v.id)) {
-      prevVideos.push(v);
-      nuevos++;
-    }
-  }
-  // Eliminar duplicados por si acaso
-  const unique = Object.values(prevVideos.reduce((acc, v) => { acc[v.id] = v; return acc; }, {}));
-  fs.writeFileSync(path, JSON.stringify(unique, null, 2));
-  console.log(`Guardados ${unique.length} videos en videos_matusalen.json (${nuevos} nuevos añadidos)`);
 
-  // Calcular y mostrar el total de segundos acumulados
-  const totalSegundos = calcularTotalSegundos(unique);
-  console.log(`Duración total acumulada de videos: ${totalSegundos} segundos (${(totalSegundos/60).toFixed(2)} minutos, ${(totalSegundos/3600).toFixed(2)} horas)`);
-})();
+// Ejecutar solo si es el módulo principal
+if (process.argv[1] === new URL(import.meta.url).pathname || process.argv[1] === import.meta.url.replace('file://','')) {
+  (async () => {
+    let prevVideos = [];
+    let prevIds = new Set();
+    const path = 'videos_matusalen.json';
+    if (fs.existsSync(path)) {
+      try {
+        prevVideos = JSON.parse(fs.readFileSync(path, 'utf8'));
+        prevVideos.forEach(v => prevIds.add(v.id));
+        console.log(`Cargados ${prevVideos.length} videos previos.`);
+      } catch (e) {
+        console.warn('No se pudo leer videos_matusalen.json, se sobrescribirá.');
+      }
+    }
+    const videos = await getAllVideos(channelId);
+    let nuevos = 0;
+    for (const v of videos) {
+      if (!prevIds.has(v.id)) {
+        prevVideos.push(v);
+        nuevos++;
+      }
+    }
+    // Eliminar duplicados por si acaso
+    const unique = Object.values(prevVideos.reduce((acc, v) => { acc[v.id] = v; return acc; }, {}));
+    fs.writeFileSync(path, JSON.stringify(unique, null, 2));
+    console.log(`Guardados ${unique.length} videos en videos_matusalen.json (${nuevos} nuevos añadidos)`);
+
+    // Calcular y mostrar el total de segundos acumulados
+    const totalSegundos = calcularTotalSegundos(unique);
+    console.log(`Duración total acumulada de videos: ${totalSegundos} segundos (${(totalSegundos/60).toFixed(2)} minutos, ${(totalSegundos/3600).toFixed(2)} horas)`);
+  })();
+}
