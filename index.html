@@ -2,139 +2,241 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>IFAM Assistant v1.5 - Movilidad Macro & Micro</title>
-    <style>
-        :root { --primary: #0984e3; --dark: #2d3436; --accent: #6c5ce7; --success: #27ae60; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .app-container { width: 100%; max-width: 650px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { color: var(--dark); border-left: 5px solid var(--primary); padding-left: 15px; font-size: 1.4rem; margin-bottom: 25px; }
-        .section-title { font-size: 0.9rem; font-weight: bold; color: var(--primary); text-transform: uppercase; margin-bottom: 15px; display: block; }
-        .question-step { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .transport-box { background: #f9f9ff; padding: 20px; border-radius: 15px; border: 1px solid #e0e0ff; margin-bottom: 25px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; font-size: 0.95rem; }
-        .info-txt { font-size: 0.8rem; color: #666; margin-bottom: 10px; display: block; }
-        select, input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
-        input[type="range"] { width: 100%; accent-color: var(--primary); }
-        .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #999; margin-top: 5px; }
-        .result-card { background: var(--dark); color: white; padding: 25px; border-radius: 15px; text-align: center; margin-top: 30px; }
-        #ifam-val { font-size: 3.2rem; font-weight: bold; color: #74b9ff; display: block; }
-        .status-pill { padding: 6px 18px; border-radius: 50px; font-weight: bold; margin-top: 10px; display: inline-block; font-size: 0.9rem; }
-        .debug-info { font-size: 0.7rem; color: #aaa; margin-top: 10px; text-align: right; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videoteca Salud & Parkinson</title>
+    <link rel="stylesheet" href="doctormatusalen.css">
 </head>
 <body>
 
-<div class="app-container">
-    <h1>Calculadora IFAM v1.5</h1>
+    <nav class="navbar">
+        <div class="nav-container">
+            <span class="nav-logo">Salud<span style="font-weight: 300;">Parkinson</span> <span style="font-weight:500;color:#2a7">Doctor Matusalén</span></span>
+            <div class="nav-links">
+                <a href="#" class="nav-item active" onclick="switchSection('inicio', this)">Inicio</a>
+                <a href="#" class="nav-item" onclick="switchSection('nosotros', this)">Nosotros</a>
+                <button class="menu-toggle" id="openSidebar">Canales ☰</button>
+            </div>
+        </div>
+    </nav>
 
-    <div class="question-step">
-        <span class="section-title">1. Perfil del Paciente</span>
-        <label>Nivel de Progresión (Beta)</label>
-        <select id="q-beta" onchange="liveCalc()">
-            <option value="1.25">L1 - Inicial (Sintomatología leve)</option>
-            <option value="1.50">L2 - Moderado (Rigidez/Temblor)</option>
-            <option value="1.75">L3 - Avanzado (Fluctuaciones)</option>
-            <option value="2.50">L4 - Complejo (Dependencia alta)</option>
-        </select>
-    </div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Explorar Canales</h3>
+            <button class="close-sidebar" id="closeSidebar">&times;</button>
+        </div>
+        <ul class="channel-list">
+            <li><a href="https://www.youtube.com/@doctormatusalen" class="channel-link active" target="_blank">Doctor Matusalén</a></li>
+        </ul>
+    </aside>
 
-    <div class="transport-box">
-        <span class="section-title">2. Logística de Movilidad (D_total)</span>
-        
-        <label>Distancia del Trayecto (KM ida y vuelta)</label>
-        <input type="number" id="q-km" value="10" min="0" oninput="liveCalc()">
+    <div class="overlay" id="overlay"></div>
 
-        <label>Modo de Transporte (Carga Macro)</label>
-        <select id="q-modo" onchange="liveCalc()">
-            <option value="0">Teletrabajo (Gasto 0)</option>
-            <option value="0.5">Coche propio (Carga 0.5)</option>
-            <option value="2.0">Transporte Público / Caminar (Carga 2.0)</option>
-        </select>
+    <main class="main-content">
+        <section id="section-inicio" class="content-section active">
+                        <div class="section-header">
+                                <p id="channelCount">Cargando videos...</p>
+                                <p id="totalDuration" style="font-weight:bold;color:#2a7">Duración total: ...</p>
+                                <div class="channel-description" style="margin-top:10px;font-size:1.05em;color:#333">
+                                    <strong>@Doctormatusalen</strong> es un canal de Youtube donde su creador demuestra que no somos lo que nos pasa, sino cómo lo enfrentamos. <strong>— Jamás una víctima, siempre un luchador.</strong>
+                                </div>
+                        </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar por título, síntoma o categoría...">
+            </div>
+            <div id="dashboard"></div>
+        </section>
 
-        <label>Movilidad en el Puesto (Carga Micro): <span id="val-micro">3</span></label>
-        <input type="range" id="q-micro" min="1" max="10" value="3" oninput="liveCalc()">
-        <div class="range-labels"><span>Estático</span><span>Movilidad Constante</span></div>
-    </div>
+                <section id="section-nosotros" class="content-section">
+                        <div class="about-card">
+                                <h2>Sobre este Proyecto</h2>
+                                <p>🌟 <strong>Quién es Doctor Matusalén</strong><br>
+                                Es un médico de familia que dedicó 33 años a cuidar a otros, a escuchar, a acompañar, a sostener. Y cuando la vida le puso delante un desafío serio —13 años conviviendo con Parkinson— no eligió esconderse, ni rendirse, ni convertirse en un símbolo de lástima. Eligió lo contrario: seguir siendo útil, seguir aportando, seguir luchando.</p>
 
-    <div class="question-step">
-        <span class="section-title">3. Esfuerzo Operativo</span>
-        <label>Tarea Principal</label>
-        <select id="q-task" onchange="liveCalc()">
-            <option value="58320">Gestión por Voz / Lectura (Bajo ID)</option>
-            <option value="141480">Oficina Estándar (Teclado/Ratón)</option>
-            <option value="212400">Operativo Manual (Corte/Montaje/Alta Precisión)</option>
-        </select>
+                                <p>🔥 <strong>Su actitud</strong><br>
+                                La actitud del Doctor Matusalén se puede resumir en tres pilares:</p>
+                                
+                                    <div style="margin-bottom:1em"><strong>Dignidad combativa</strong><br>
+                                    No niega su enfermedad, pero tampoco se deja definir por ella.<br>
+                                    No se presenta como víctima, sino como alguien que sigue peleando cada día.</div>
+                                    <div style="margin-bottom:1em"><strong>Servicio incluso después del servicio</strong><br>
+                                    Aunque está jubilado, su vocación no se apagó.<br>
+                                    Su canal de YouTube es una extensión natural de su vida profesional:<br>
+                                    seguir ayudando, seguir enseñando, seguir acompañando.</div>
+                                    <div style="margin-bottom:1em"><strong>Resiliencia con propósito</strong><br>
+                                    No lucha por orgullo ni por apariencia.<br>
+                                    Lucha porque sabe que su ejemplo puede inspirar a otros que atraviesan dificultades.<br>
+                                    Su mensaje es simple:<br>
+                                    “No puedo elegir lo que me pasa, pero sí cómo respondo.”</div>
+                                
 
-        <label style="margin-top:15px;">Interacción Social (Eta): <span id="val-eta">5</span> personas</label>
-        <input type="range" id="q-eta-social" min="0" max="40" value="5" oninput="liveCalc()">
-    </div>
+                                <p>🎥 <strong>Por qué tiene un canal de YouTube</strong><br>
+                                Su canal no es un pasatiempo. Es una misión.</p>
+                                
+                                    Compartir experiencia médica desde la cercanía de quien ha visto miles de historias reales.
+                                    Dar voz a quienes viven con enfermedades crónicas, sin dramatismo ni victimismo.
+                                    Demostrar que la jubilación no es el final, sino una nueva etapa para crear, comunicar y aportar.
+                                    Mantenerse activo, mental y emocionalmente, porque la actividad es también una forma de tratamiento.
+                                    Inspirar, sin pretenderlo, a quienes creen que ya no pueden más.
+                                
 
-    <div class="result-card">
-        <h3>Índice de Fatiga Proyectado</h3>
-        <span id="ifam-val">0</span>
-        <div id="status-pill" class="status-pill">ZONA</div>
-        <p id="recommendation" style="font-size: 0.85rem; margin-top: 15px; font-style: italic;"></p>
-        <div class="debug-info" id="debug-d">D_total: 0</div>
-    </div>
-</div>
+                                <p>💪 <strong>Su motivo profundo</strong><br>
+                                El motor del Doctor Matusalén es este:<br>
+                                Convertir su propia vulnerabilidad en una herramienta de fortaleza para otros.<br>
+                                No busca compasión.<br>
+                                No busca aplausos.<br>
+                                Busca sentido.<br>
+                                Y lo encuentra en cada persona que aprende algo, que se siente acompañada, que descubre que no está sola.</p>
 
-<script>
-function liveCalc() {
-    // 1. Obtener valores
-    const beta = parseFloat(document.getElementById('q-beta').value);
-    const km = parseFloat(document.getElementById('q-km').value) || 0;
-    const factorModo = parseFloat(document.getElementById('q-modo').value);
-    const microMov = parseInt(document.getElementById('q-micro').value);
-    const sumTID = parseInt(document.getElementById('q-task').value);
-    const nu = parseInt(document.getElementById('q-eta-social').value);
-    
-    // Actualizar etiquetas visuales
-    document.getElementById('val-micro').innerText = microMov;
-    document.getElementById('val-eta').innerText = nu;
+                                <p style="margin-top:2em;">Esta plataforma centraliza el conocimiento compartido por expertos en Parkinson para facilitar la búsqueda de información específica a pacientes y familiares.<br><br>
+                                Diseñado para una navegación rápida, sencilla y accesible desde cualquier dispositivo.</p>
+                        </div>
+                </section>
+    </main>
 
-    // 2. Cálculos Intermedios
-    const gamma = 1.2; // Martes estándar
-    const etaSocial = 1.0 + (0.05 * nu);
+    <script>
+        let allVideos = [];
 
-    // CÁLCULO DE D_TOTAL (Macro + Micro)
-    // Trayecto Macro + Esfuerzo en puesto
-    const dTotal = (km * factorModo) + microMov;
-    document.getElementById('debug-d').innerText = "D_total calculado: " + dTotal.toFixed(2);
+        // 1. Carga y transformación de Datos
+        async function loadData() {
+            try {
+                // Carga desde videos_matusalen.json
+                const response = await fetch('videos_matusalen.json');
+                const rawVideos = await response.json();
+                // Transformar al formato esperado por el dashboard
+                allVideos = rawVideos.map(v => ({
+                    titulo: v.title,
+                    contenido: v.description,
+                    categoria: extraerCategoria(v.title, v.description),
+                    url: `https://www.youtube.com/watch?v=${v.id}`,
+                    canal: 'Doctor Matusalén',
+                    fecha: v.publishedAt ? v.publishedAt.split('T')[0] : '',
+                    duracion: v.duration || ''
+                }));
+                document.getElementById('channelCount').textContent = `${allVideos.length} videos disponibles`;
 
-    // 3. FÓRMULA MAESTRA IFAM
-    // FactorD utiliza el logaritmo de la nueva D_total
-    const factorD = Math.log2(4 * dTotal + 1);
-    const totalIFAM = Math.round(gamma * etaSocial * sumTID * beta * factorD);
+                // Calcular duración total usando el JS externo
+                const totalSeconds = window.calcularTotalSegundos(allVideos);
+                const texto = window.formatoDuracion(totalSeconds);
+                document.getElementById('totalDuration').textContent = `Duración total: ${texto}`;
+                renderDashboard('');
+            } catch (e) {
+                console.error("Error: Asegúrate de tener un archivo videos_matusalen.json válido.", e);
+                document.getElementById('dashboard').innerHTML = "<p style='text-align:center'>Error al cargar los datos. Verifica que el archivo videos_matusalen.json exista.</p>";
+            }
+        }
 
-    // 4. Actualización de UI
-    const scoreElement = document.getElementById('ifam-val');
-    const pill = document.getElementById('status-pill');
-    const rec = document.getElementById('recommendation');
+        // Lógica para extraer categoría (puedes personalizarla)
+        function extraerCategoria(titulo, descripcion) {
+            const texto = `${titulo} ${descripcion}`.toLowerCase();
+            if (texto.includes('levodopa')) return 'Levodopa';
+            if (texto.includes('off')) return 'Fase OFF';
+            if (texto.includes('on')) return 'Fase ON';
+            if (texto.includes('síntoma') || texto.includes('sintoma')) return 'Síntomas';
+            if (texto.includes('tratamiento')) return 'Tratamientos';
+            if (texto.includes('cuidador') || texto.includes('cuidadora')) return 'Cuidadores';
+            if (texto.includes('progresión') || texto.includes('progresion')) return 'Progresión';
+            if (texto.includes('medicación') || texto.includes('medicacion')) return 'Medicación';
+            if (texto.includes('diagnóstico') || texto.includes('diagnostico')) return 'Diagnóstico';
+            if (texto.includes('ejercicio')) return 'Ejercicio';
+            if (texto.includes('sueño')) return 'Sueño';
+            if (texto.includes('emocion') || texto.includes('emocional')) return 'Emociones';
+            return 'General';
+        }
 
-    scoreElement.innerText = totalIFAM.toLocaleString();
+        // 2. Renderizado del Dashboard
+        function renderDashboard(query) {
+            const container = document.getElementById('dashboard');
+            container.innerHTML = '';
 
-    if (totalIFAM < 1000000) {
-        pill.innerText = "VERDE: Sostenible";
-        pill.style.background = "#27ae60";
-        rec.innerText = "Condiciones óptimas. El trayecto no compromete tu jornada.";
-    } else if (totalIFAM < 3000000) {
-        pill.innerText = "AMARILLA: Vigilancia";
-        pill.style.background = "#f1c40f"; pill.style.color = "#2d3436";
-        rec.innerText = "Fatiga moderada. El desplazamiento empieza a restar reserva dopaminérgica.";
-    } else if (totalIFAM < 6000000) {
-        pill.innerText = "NARANJA: Crítica";
-        pill.style.background = "#e67e22";
-        rec.innerText = "Riesgo alto. La combinación de trayecto y tarea requiere adaptación urgente.";
-    } else {
-        pill.innerText = "ROJA: Inviable";
-        pill.style.background = "#c0392b";
-        rec.innerText = "Colapso de canal inminente. El trayecto físico macro es incompatible con el nivel Beta.";
-    }
-}
+            const filtered = allVideos.filter(v => 
+                v.titulo.toLowerCase().includes(query) || 
+                v.categoria.toLowerCase().includes(query) ||
+                v.contenido.toLowerCase().includes(query)
+            );
 
-// Iniciar al cargar
-window.onload = liveCalc;
-</script>
+            // Agrupar por categoría
+            const groups = filtered.reduce((acc, v) => {
+                acc[v.categoria] = acc[v.categoria] || [];
+                acc[v.categoria].push(v);
+                return acc;
+            }, {});
 
+            if (Object.keys(groups).length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:gray">No se encontraron resultados.</p>';
+                return;
+            }
+
+            for (const [cat, videos] of Object.entries(groups)) {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                
+                // Si hay búsqueda, las abrimos automáticamente
+                const isOpen = query.length > 0;
+
+                card.innerHTML = `
+                    <div class="category-trigger">
+                        <span>${cat} (${videos.length})</span>
+                        <span class="chevron">${isOpen ? '▲' : '▼'}</span>
+                    </div>
+                    <div class="video-list" style="display: ${isOpen ? 'block' : 'none'}">
+                        ${videos.map(v => `
+                            <div class="video-item">
+                                <div class="video-meta">${v.fecha} • ${v.canal}</div>
+                                <a href="${v.url}" target="_blank" class="video-title">${v.titulo}</a>
+                                <p class="video-content">${v.contenido}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                card.querySelector('.category-trigger').onclick = function() {
+                    const list = this.nextElementSibling;
+                    const isNowOpen = list.style.display === 'block';
+                    list.style.display = isNowOpen ? 'none' : 'block';
+                    this.querySelector('.chevron').textContent = isNowOpen ? '▼' : '▲';
+                };
+
+                container.appendChild(card);
+            }
+        }
+
+        // 3. Control de UI (Sidebar y Navegación)
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        document.getElementById('openSidebar').onclick = () => {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+        };
+
+        document.getElementById('closeSidebar').onclick = document.getElementById('overlay').onclick = () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        };
+
+        function switchSection(id, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`section-${id}`).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function selectChannel(name) {
+            document.getElementById('channelTitle').textContent = name;
+            document.querySelectorAll('.channel-link').forEach(l => l.classList.remove('active'));
+            event.target.classList.add('active');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            // Aquí podrías filtrar allVideos por canal si tu JSON tuviera múltiples canales
+        }
+
+        // 4. Buscador
+        document.getElementById('searchInput').oninput = (e) => {
+            renderDashboard(e.target.value.toLowerCase());
+        };
+
+        loadData();
+    </script>
+    <script src="calculoDuracion.js"></script>
 </body>
 </html>
